@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: null_out.c 112 2010-08-18 12:59:54Z Michael.McTernan $
+ * $Id: null_out.c 204 2015-01-24 18:57:51Z Michael.McTernan $
  *
  * This file is part of mscgen, a message sequence chart renderer.
  * Copyright (C) 2005 Michael C McTernan, Michael.McTernan.2001@cs.bris.ac.uk
@@ -64,7 +64,8 @@ static void NullDottedLine(struct ADrawTag *ctx UNUSED,
 static void NullTextR(struct ADrawTag *ctx UNUSED,
                       unsigned int     x UNUSED,
                       unsigned int     y UNUSED,
-                      const char      *string UNUSED)
+                      const char      *string UNUSED,
+                      const char      *url UNUSED)
 {
 }
 
@@ -72,7 +73,8 @@ static void NullTextR(struct ADrawTag *ctx UNUSED,
 static void NullTextL(struct ADrawTag *ctx UNUSED,
                       unsigned int     x UNUSED,
                       unsigned int     y UNUSED,
-                      const char      *string UNUSED)
+                      const char      *string UNUSED,
+                      const char      *url UNUSED)
 {
 }
 
@@ -80,7 +82,8 @@ static void NullTextL(struct ADrawTag *ctx UNUSED,
 static void NullTextC(struct ADrawTag *ctx UNUSED,
                       unsigned int     x UNUSED,
                       unsigned int     y UNUSED,
-                      const char      *string UNUSED)
+                      const char      *string UNUSED,
+                      const char      *url UNUSED)
 {
 }
 
@@ -139,13 +142,13 @@ static void NullSetFontSize(struct ADrawTag *ctx UNUSED,
 }
 
 
-static Boolean NullClose(struct ADrawTag *ctx UNUSED)
+static bool NullClose(struct ADrawTag *ctx UNUSED)
 {
-    return TRUE;
+    return true;
 }
 
 
-Boolean NullInit(struct ADrawTag *outContext)
+bool NullInit(struct ADrawTag *outContext)
 {
     /* Fill in the function pointers */
     outContext->line            = NullLine;
@@ -164,7 +167,7 @@ Boolean NullInit(struct ADrawTag *outContext)
     outContext->setFontSize     = NullSetFontSize;
     outContext->close           = NullClose;
 
-    return TRUE;
+    return true;
 }
 
 /* END OF FILE */

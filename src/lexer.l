@@ -1,7 +1,7 @@
 %{
 /***************************************************************************
  *
- * $Id: lexer.l 184 2011-02-28 21:38:28Z Michael.McTernan $
+ * $Id: lexer.l 203 2015-01-24 18:27:48Z Michael.McTernan $
  *
  * Mscgen language lexer definition.
  * Copyright (C) 2009 Michael C McTernan, Michael.McTernan.2001@cs.bris.ac.uk
@@ -24,11 +24,11 @@
  *
  ***************************************************************************/
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 #include "msc.h"
-#include "bool.h"
 #include "safe.h"
 #include "lexer.h"
 #include "language.h"  /* Token definitions from Yacc/Bison */
@@ -36,7 +36,7 @@
 /* Counter for error reporting */
 static unsigned long  lex_linenum = 1;
 static char          *lex_line = NULL;
-static Boolean        lex_utf8 = FALSE;
+static bool           lex_utf8 = false;
 
 /* Local function prototypes */
 static void newline(const char *text, unsigned int n);
@@ -51,7 +51,7 @@ static char *trimQstring(char *s);
 %%
 
 <INITIAL>{
-\xef\xbb\xbf                          lex_utf8 = TRUE; BEGIN(BODY);
+\xef\xbb\xbf                          lex_utf8 = true; BEGIN(BODY);
 (\r\n).*                              newline(yytext, 2); BEGIN(BODY);
 (\r|\n).*                             newline(yytext, 1); BEGIN(BODY);
 .                                     unput(yytext[0]); BEGIN(BODY);
@@ -226,7 +226,7 @@ void lex_destroy(void)
     }
 }
 
-Boolean lex_getutf8(void)
+bool lex_getutf8(void)
 {
     return lex_utf8;
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: main.c 187 2011-03-03 21:48:02Z Michael.McTernan@gmail.com $
+ * $Id: main.c 204 2015-01-24 18:57:51Z Michael.McTernan $
  *
  * This file is part of mscgen, a message sequence chart renderer.
  * Copyright (C) 2010 Michael C McTernan, Michael.McTernan.2001@cs.bris.ac.uk
@@ -99,8 +99,8 @@ typedef struct GlobalOptionsTag
     /** Anguluar box slope in pixels. */
     unsigned int aboxSlope;
 
-    /** If TRUE, wrap arc text as well as box contents. */
-    Boolean      wordWrapArcLabels;
+    /** If true, wrap arc text as well as box contents. */
+    bool         wordWrapArcLabels;
 
     /** Horizontal width of the arrow heads. */
     unsigned int arrowWidth;
@@ -142,21 +142,21 @@ RowInfo;
  * Local Variables.
  ***************************************************************************/
 
-static Boolean gInputFilePresent = FALSE;
-static char    gInputFile[4096];
+static bool gInputFilePresent = false;
+static char gInputFile[4096];
 
-static Boolean gOutputFilePresent = FALSE;
-static char    gOutputFile[4096];
+static bool gOutputFilePresent = false;
+static char gOutputFile[4096];
 
-static Boolean gOutTypePresent = FALSE;
-static char    gOutType[10];
+static bool gOutTypePresent = false;
+static char gOutType[10];
 
-static Boolean gDumpLicencePresent = FALSE;
+static bool gDumpLicencePresent = false;
 
-static Boolean gPrintParsePresent = FALSE;
+static bool gPrintParsePresent = false;
 
-static Boolean gOutputFontPresent = FALSE;
-static char    gOutputFont[256];
+static bool gOutputFontPresent = false;
+static char gOutputFont[256];
 
 /** Command line switches.
  * This gives the command line switches that can be interpreted by mscgen.
@@ -185,7 +185,7 @@ static GlobalOptions gOpts =
     6,      /* rboxArc */
     12,     /* noteCorner */
     6,      /* aboxSlope */
-    FALSE,  /* wordWrapArcLabels */
+    false,  /* wordWrapArcLabels */
 
     /* Arrow options */
     10, 6,
@@ -219,6 +219,37 @@ static void deleteTmp()
     }
 }
 
+
+/** Find the next newline in some string.
+ * This returns a pointer to the start of the next newline in a
+ * string, roughly equivalent to strstr(line, "\n"), but ignoring
+ * escaped newlines such as "\\n".
+ */
+static char *strnl(const char *line)
+{
+    const char *nl = line;
+
+    do
+    {
+        nl = strstr(nl, "\\n");
+        if(nl)
+        {
+            if(nl == line || nl[-1] != '\\')
+            {
+                return (char *)nl;
+            }
+            else
+            {
+                nl += 2;
+            }
+        }
+    }
+    while(nl);
+
+	return NULL;
+}
+
+
 /** Remove any file extension from the passed filename.
  */
 static void trimExtension(char *s)
@@ -247,7 +278,7 @@ static void trimExtension(char *s)
 
 /** Check if some arc type indicates a box.
  */
-static Boolean isBoxArc(const MscArcType a)
+static bool isBoxArc(const MscArcType a)
 {
     return a == MSC_ARC_BOX || a == MSC_ARC_RBOX  ||
            a == MSC_ARC_ABOX || a== MSC_ARC_NOTE;
@@ -434,7 +465,7 @@ static unsigned int computeLabelLines(Msc               m,
     while(label != NULL)
     {
         /* First split around user specified lines with literal '\n' */
-        char *nextLine = strstr(label, "\\n");
+        char *nextLine = strnl(label);
         if(nextLine)
         {
             const int lineLen = nextLine - label;
@@ -527,7 +558,7 @@ static char *getLine(const char        *string,
         }
 
         /* Search for next delimited */
-        lineEnd = strstr(lineStart, "\\n");
+        lineEnd = strnl(lineStart);
 
         line--;
     }
@@ -561,7 +592,7 @@ static char *getLine(const char        *string,
 
 /** Check if some arc name indicates a broadcast entity.
  */
-static Boolean isBroadcastArc(const char *entity)
+static bool isBroadcastArc(const char *entity)
 {
     return entity != NULL && (strcmp(entity, "*") == 0);
 }
@@ -785,7 +816,7 @@ static void entityText(FILE             *ismap,
             }
 
             /* Render text and restore pen */
-            drw.textC (&drw, x, y, lineLabel);
+            drw.textC (&drw, x, y, lineLabel, entUrl);
             drw.setPen(&drw, ADRAW_COL_BLACK);
             drw.setBgPen(&drw, ADRAW_COL_WHITE);
 
@@ -806,7 +837,7 @@ static void entityText(FILE             *ismap,
                 if(entIdUrl)
                 {
                     drw.setPen(&drw, ADRAW_COL_BLUE);
-                    drw.textR (&drw, idx, idy, entId);
+                    drw.textR (&drw, idx, idy, entId, entIdUrl);
                     drw.setPen(&drw, ADRAW_COL_BLACK);
 
                     /* Image map output */
@@ -817,7 +848,7 @@ static void entityText(FILE             *ismap,
                 }
                 else
                 {
-                    drw.textR(&drw, idx, idy, entId);
+                    drw.textR(&drw, idx, idy, entId, NULL);
                 }
 
                 drw.setFontSize(&drw, ADRAW_FONT_SMALL);
@@ -851,6 +882,7 @@ static RowInfo *computeCanvasSize(Msc           m,
 
     nextYmin = ymin = gOpts.entityHeadGap;
     yskipmax = 0;
+    ymax = 0;
 
     MscResetArcIterator(m);
     do
@@ -955,13 +987,13 @@ static RowInfo *computeCanvasSize(Msc           m,
  * \param m          The \a Msc for which the lines are drawn
  * \param ymin       Top of the row.
  * \param ymax       Bottom of the row.
- * \param dotted     If #TRUE, produce a dotted line, otherwise solid.
+ * \param dotted     If \a true, produce a dotted line, otherwise solid.
  * \param colourRefs Colour references for each entity.
  */
 static void entityLines(Msc                m,
                         const unsigned int ymin,
                         const unsigned int ymax,
-                        Boolean            dotted,
+                        bool               dotted,
                         const ADrawColour *colourRefs)
 {
     unsigned int t;
@@ -1254,7 +1286,7 @@ static void arcText(Msc                m,
         }
 
         /* Render text and restore pen */
-        drw.textR (&drw, x, y, lineLabel);
+        drw.textR (&drw, x, y, lineLabel, arcUrl);
         drw.setPen(&drw, ADRAW_COL_BLACK);
         drw.setBgPen(&drw, ADRAW_COL_WHITE);
 
@@ -1284,7 +1316,7 @@ static void arcText(Msc                m,
             }
 
             /* Render text and restore pen and font */
-            drw.textR (&drw, idx, idy, arcId);
+            drw.textR (&drw, idx, idy, arcId, arcIdUrl);
             drw.setPen(&drw, ADRAW_COL_BLACK);
             drw.setFontSize(&drw, ADRAW_FONT_SMALL);
         }
@@ -1313,7 +1345,7 @@ static void arcLine(Msc               m,
                     unsigned int      startCol,
                     unsigned int      endCol,
                     const char       *arcLineCol,
-                    Boolean           hasArrows,
+                    bool              hasArrows,
                     const int         hasBiArrows,
                     const MscArcType  arcType)
 {
@@ -1387,24 +1419,24 @@ static void arcLine(Msc               m,
         if(arcType == MSC_ARC_RETVAL)
         {
             drw.dottedArc(&drw,
-                          sx, y,
+                          sx, y + ygradient/2,
                           gOpts.entitySpacing,
-                          gOpts.loopArcHeight,
+                          gOpts.loopArcHeight + ygradient,
                           90,
                           270);
         }
         else if(arcType == MSC_ARC_DOUBLE)
         {
             drw.arc(&drw,
-                    sx, y - 1,
+                    sx, y - 1 + ygradient/2,
                     gOpts.entitySpacing,
-                    gOpts.loopArcHeight,
+                    gOpts.loopArcHeight + ygradient,
                     90,
                     270);
             drw.arc(&drw,
-                    sx, y + 1,
+                    sx, y + 1 + ygradient/2,
                     gOpts.entitySpacing,
-                    gOpts.loopArcHeight,
+                    gOpts.loopArcHeight + ygradient,
                     90,
                     270);
         }
@@ -1413,17 +1445,17 @@ static void arcLine(Msc               m,
             unsigned int px, py;
 
             drw.arc(&drw,
-                    sx, y - 1,
+                    sx, y - 1 + ygradient/2,
                     gOpts.entitySpacing - 8,
-                    gOpts.loopArcHeight,
+                    gOpts.loopArcHeight + ygradient,
                     180 - 45,
                     270);
 
-            hasArrows = FALSE;
+            hasArrows = false;
 
             /* Get co-ordinates of the arc end-point */
-            ADrawComputeArcPoint(sx, y - 1, gOpts.entitySpacing - 8,
-                                 gOpts.loopArcHeight, 180 - 45,
+            ADrawComputeArcPoint(sx, y - 1 + ygradient/2, gOpts.entitySpacing - 8,
+                                 gOpts.loopArcHeight + ygradient, 180 - 45,
                                  &px, &py);
 
             /* Draw a cross */
@@ -1433,16 +1465,16 @@ static void arcLine(Msc               m,
         else
         {
             drw.arc(&drw,
-                    sx, y,
+                    sx, y + ygradient/2,
                     gOpts.entitySpacing - 4,
-                    gOpts.loopArcHeight,
+                    gOpts.loopArcHeight + ygradient,
                     90,
                     270);
         }
 
         if(hasArrows)
         {
-            arrowR(dx, y + (gOpts.loopArcHeight / 2), arcType);
+            arrowR(dx, y + ygradient + (gOpts.loopArcHeight / 2), arcType);
         }
     }
     else
@@ -1451,24 +1483,24 @@ static void arcLine(Msc               m,
         if(arcType == MSC_ARC_RETVAL)
         {
             drw.dottedArc(&drw,
-                          sx, y,
+                          sx, y + ygradient/2,
                           gOpts.entitySpacing,
-                          gOpts.loopArcHeight,
+                          gOpts.loopArcHeight + ygradient,
                           270,
                           90);
         }
         else if(arcType == MSC_ARC_DOUBLE)
         {
             drw.arc(&drw,
-                    sx, y - 1,
+                    sx, y - 1 + ygradient/2,
                     gOpts.entitySpacing,
-                    gOpts.loopArcHeight,
+                    gOpts.loopArcHeight + ygradient,
                     270,
                     90);
             drw.arc(&drw,
-                    sx, y + 1,
+                    sx, y + 1 + ygradient/2,
                     gOpts.entitySpacing,
-                    gOpts.loopArcHeight,
+                    gOpts.loopArcHeight + ygradient,
                     270,
                     90);
         }
@@ -1477,17 +1509,17 @@ static void arcLine(Msc               m,
             unsigned int px, py;
 
             drw.arc(&drw,
-                    sx, y - 1,
+                    sx, y - 1 + ygradient/2,
                     gOpts.entitySpacing - 8,
-                    gOpts.loopArcHeight,
+                    gOpts.loopArcHeight + ygradient,
                     270,
                     45);
 
-            hasArrows = FALSE;
+            hasArrows = false;
 
             /* Get co-ordinates of the arc end-point */
-            ADrawComputeArcPoint(sx, y - 1, gOpts.entitySpacing - 8,
-                                 gOpts.loopArcHeight, 45,
+            ADrawComputeArcPoint(sx, y - 1 + ygradient/2, gOpts.entitySpacing - 8,
+                                 gOpts.loopArcHeight + ygradient, 45,
                                  &px, &py);
 
             /* Draw a cross */
@@ -1497,16 +1529,16 @@ static void arcLine(Msc               m,
         else
         {
             drw.arc(&drw,
-                    sx, y,
+                    sx, y + ygradient/2,
                     gOpts.entitySpacing,
-                    gOpts.loopArcHeight,
+                    gOpts.loopArcHeight + ygradient,
                     270,
                     90);
         }
 
         if(hasArrows)
         {
-            arrowL(dx, y + (gOpts.loopArcHeight / 2), arcType);
+            arrowL(dx, y + ygradient + (gOpts.loopArcHeight / 2), arcType);
         }
     }
 
@@ -1518,11 +1550,11 @@ static void arcLine(Msc               m,
 }
 
 
-/* Perform post-parsing validation of the MSC.
- *  This checks the passed MSC for various rules which can't easily be tested
- *  at parse time.
+/** Perform post-parsing validation of the MSC.
+ * This checks the passed MSC for various rules which can't easily be tested
+ * at parse time.
  */
-Boolean checkMsc(Msc m)
+bool checkMsc(Msc m)
 {
     /* Check all arc entites are known */
     MscResetArcIterator(m);
@@ -1543,20 +1575,20 @@ Boolean checkMsc(Msc m)
             {
                 fprintf(stderr, "Error detected at line %u: Unknown source entity '%s'.\n",
                         MscGetCurrentArcInputLine(m), src);
-                return FALSE;
+                return false;
             }
 
             if(endCol == -1 && !isBroadcastArc(dst))
             {
                 fprintf(stderr, "Error detected at line %u: Unknown destination entity '%s'.\n",
                         MscGetCurrentArcInputLine(m), dst);
-                return FALSE;
+                return false;
             }
         }
     }
     while(MscNextArc(m));
 
-    return TRUE;
+    return true;
 }
 
 
@@ -1569,7 +1601,7 @@ int main(const int argc, const char *argv[])
     Msc              m;
     unsigned int     w, h, row, col;
     RowInfo         *rowInfo;
-    Boolean          addLines;
+    bool             addLines;
     float            f;
 
     /* Parse the command line options */
@@ -1603,7 +1635,7 @@ int main(const int argc, const char *argv[])
             return EXIT_FAILURE;
         }
 
-        gOutputFilePresent = TRUE;
+        gOutputFilePresent = true;
         snprintf(gOutputFile, sizeof(gOutputFile), "%s", gInputFile);
         trimExtension(gOutputFile);
         strncat(gOutputFile, ".", sizeof(gOutputFile) - (strlen(gOutputFile) + 1));
@@ -1867,7 +1899,7 @@ int main(const int argc, const char *argv[])
     }
 
     /* Draw the arcs */
-    addLines = TRUE;
+    addLines = true;
     row = 0;
 
     MscResetArcIterator(m);
@@ -1889,7 +1921,7 @@ int main(const int argc, const char *argv[])
 
         if(arcType == MSC_ARC_PARALLEL)
         {
-            addLines = FALSE;
+            addLines = false;
 
             /* Rewind the row */
             assert(row > 0);
@@ -1955,7 +1987,7 @@ int main(const int argc, const char *argv[])
                 /* Add in the entity lines */
                 if(addLines)
                 {
-                    entityLines(m, ymin, ymax + gOpts.arcSpacing, FALSE, entColourRef);
+                    entityLines(m, ymin, ymax + gOpts.arcSpacing, false, entColourRef);
                 }
 
                 /* Draw arcs to each entity */
@@ -1980,7 +2012,7 @@ int main(const int argc, const char *argv[])
                 {
                     if(addLines)
                     {
-                        entityLines(m, ymin, ymax + gOpts.arcSpacing, FALSE, entColourRef);
+                        entityLines(m, ymin, ymax + gOpts.arcSpacing, false, entColourRef);
                     }
                     arcBox(ymin, ymax, startCol, endCol, arcType, arcLineColour, arcTextBgColour);
                 }
@@ -1988,14 +2020,14 @@ int main(const int argc, const char *argv[])
                 {
                     if(addLines)
                     {
-                        entityLines(m, ymin, ymax + gOpts.arcSpacing, TRUE /* dotted */, entColourRef);
+                        entityLines(m, ymin, ymax + gOpts.arcSpacing, true /* dotted */, entColourRef);
                     }
                 }
                 else if(arcType == MSC_ARC_DIVIDER || arcType == MSC_ARC_SPACE)
                 {
                     if(addLines)
                     {
-                        entityLines(m, ymin, ymax + gOpts.arcSpacing, FALSE, entColourRef);
+                        entityLines(m, ymin, ymax + gOpts.arcSpacing, false, entColourRef);
                     }
 
                     /* Dividers also have a horizontal line at the middle */
@@ -2023,7 +2055,7 @@ int main(const int argc, const char *argv[])
                 {
                     if(addLines)
                     {
-                        entityLines(m, ymin, ymax + gOpts.arcSpacing, FALSE, entColourRef);
+                        entityLines(m, ymin, ymax + gOpts.arcSpacing, false, entColourRef);
                     }
                     arcLine(m, ymid, arcGradient, startCol, endCol, arcLineColour,
                             arcHasArrows, arcHasBiArrows, arcType);
@@ -2044,7 +2076,7 @@ int main(const int argc, const char *argv[])
 
             /* Advance the row */
             row++;
-            addLines = TRUE;
+            addLines = true;
         }
     }
     while(MscNextArc(m));
@@ -2052,7 +2084,7 @@ int main(const int argc, const char *argv[])
     /* Skip arcs may require the entity lines to be extended */
     entityLines(m,
                 rowInfo[(MscGetNumArcs(m) - MscGetNumParallelArcs(m)) - 1].ymax,
-                h, FALSE, entColourRef);
+                h, false, entColourRef);
 
     /* Close the image map if needed */
     if(ismap)

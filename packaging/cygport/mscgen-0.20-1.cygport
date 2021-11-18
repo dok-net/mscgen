@@ -1,4 +1,4 @@
-# $Id: mscgen-0.20-1.cygport 191 2011-03-05 15:07:35Z Michael.McTernan@gmail.com $
+# $Id: mscgen-0.20-1.cygport 193 2011-03-05 15:37:22Z Michael.McTernan $
 
 DESCRIPTION="Message Sequence Chart Renderer"
 HOMEPAGE="http://www.mcternan.co.uk/"

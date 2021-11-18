@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: utf8.c 93 2009-08-24 20:57:31Z Michael.McTernan $
+ * $Id: utf8.c 203 2015-01-24 18:27:48Z Michael.McTernan $
  *
  * UTF8 decode routine.
  * Copyright (C) 2008 Michael C McTernan, Michael.McTernan.2001@cs.bris.ac.uk
@@ -64,11 +64,11 @@ static unsigned int clo(char c)
  * Global Functions
  **************************************************************************/
 
-Boolean Utf8Decode(const char *s, unsigned int *r, unsigned int *bytes)
+bool Utf8Decode(const char *s, unsigned int *r, unsigned int *bytes)
 {
     if((*s & 0x80) == 0)
     {
-        return FALSE;
+        return false;
     }
     else
     {

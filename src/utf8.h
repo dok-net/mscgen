@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: utf8.h 93 2009-08-24 20:57:31Z Michael.McTernan $
+ * $Id: utf8.h 203 2015-01-24 18:27:48Z Michael.McTernan $
  *
  * UTF8 decode routine interface.
  * Copyright (C) 2009 Michael C McTernan, Michael.McTernan.2001@cs.bris.ac.uk
@@ -27,7 +27,7 @@
  * Includes
  **************************************************************************/
 
-#include "bool.h"
+#include <stdbool.h>
 
 /**************************************************************************
  * Macros
@@ -41,7 +41,7 @@
  * Prototypes
  **************************************************************************/
 
-Boolean Utf8Decode(const char *s, unsigned int *r, unsigned int *bytes);
+bool Utf8Decode(const char *s, unsigned int *r, unsigned int *bytes);
 
 #endif
 

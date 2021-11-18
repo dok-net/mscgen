@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: adraw.h 161 2010-10-26 20:17:16Z Michael.McTernan $
+ * $Id: adraw.h 204 2015-01-24 18:57:51Z Michael.McTernan $
  *
  * This file is part of mscgen, a message sequence chart renderer.
  * Copyright (C) 2005 Michael C McTernan, Michael.McTernan.2001@cs.bris.ac.uk
@@ -23,7 +23,7 @@
 #ifndef ADRAW_H
 #define ADRAW_H
 
-#include "bool.h"
+#include <stdbool.h>
 
 /***************************************************************************
  * Types
@@ -140,11 +140,13 @@ typedef struct ADrawTag
      * \param x      The position at which the text should terminate.
      * \param y      The position above which the text will lie.
      * \param string The string to write.
+     * \param url    Hyperlink target, or NULL if not required.
      */
     void         (*textL)         (struct ADrawTag *ctx,
                                    unsigned int x,
                                    unsigned int y,
-                                   const char *string);
+                                   const char *string,
+                                   const char *url);
 
     /** Center aligned text.
      * Write a single line of text that will center on some co-ordinates.
@@ -152,11 +154,13 @@ typedef struct ADrawTag
      * \param x      The position at which the text should be centered.
      * \param y      The position above which the text will lie.
      * \param string The string to write.
+     * \param url    Hyperlink target, or NULL if not required.
      */
     void         (*textC)         (struct ADrawTag *ctx,
                                    unsigned int x,
                                    unsigned int y,
-                                   const char *string);
+                                   const char *string,
+                                   const char *url);
 
     /** Right aligned text.
      * Write a single line of text that will start at some co-ordinates.
@@ -164,11 +168,13 @@ typedef struct ADrawTag
      * \param x      The position at which the text should start.
      * \param y      The position above which the text will lie.
      * \param string The string to write.
+     * \param url    Hyperlink target, or NULL if not required.
      */
     void         (*textR)         (struct ADrawTag *ctx,
                                    unsigned int x,
                                    unsigned int y,
-                                   const char *string);
+                                   const char *string,
+                                   const char *url);
 
     /** Determine the width of some string.
      * \param ctx    The drawing context.
@@ -235,7 +241,7 @@ typedef struct ADrawTag
     void         (*setFontSize)   (struct ADrawTag *ctx,
                                    ADrawFontSize size);
 
-    Boolean      (*close)         (struct ADrawTag *context);
+    bool         (*close)         (struct ADrawTag *context);
 
     /* Internal context, not accessible by the user */
     void *internal;
@@ -259,14 +265,14 @@ ADraw;
  * \param[in] type             The output type to generate.
  * \param[in, out] *outContext Pointer to an \a ADraw structure to populate
  *                              with values.
- * \retval Boolean             On error, #FALSE will be returned.
+ * \returns                    On error, \a false will be returned.
  */
-Boolean ADrawOpen(unsigned int     w,
-                  unsigned int     h,
-                  const char      *file,
-                  const char      *fontName,
-                  ADrawOutputType  type,
-                  struct ADrawTag *outContext);
+bool ADrawOpen(unsigned int     w,
+               unsigned int     h,
+               const char      *file,
+               const char      *fontName,
+               ADrawOutputType  type,
+               struct ADrawTag *outContext);
 
 /** Given a string name for a colour, return the corresponding ADrawColour.
  *

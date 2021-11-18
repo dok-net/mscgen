@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: ps_out.c 186 2011-03-01 21:18:19Z Michael.McTernan $
+ * $Id: ps_out.c 204 2015-01-24 18:57:51Z Michael.McTernan $
  *
  * This file is part of mscgen, a message sequence chart renderer.
  * Copyright (C) 2005 Michael C McTernan, Michael.McTernan.2001@cs.bris.ac.uk
@@ -268,7 +268,8 @@ void PsFilledRectangle(struct ADrawTag *ctx,
 void PsTextR(struct ADrawTag *ctx,
               unsigned int     x,
               unsigned int     y,
-              const char      *string)
+              const char      *string,
+              const char      *url UNUSED)
 {
     PsContext *context = getPsCtx(ctx);
 
@@ -300,7 +301,8 @@ void PsTextR(struct ADrawTag *ctx,
 void PsTextL(struct ADrawTag *ctx,
               unsigned int     x,
               unsigned int     y,
-              const char      *string)
+              const char      *string,
+              const char      *url UNUSED)
 {
     PsContext *context = getPsCtx(ctx);
 
@@ -327,7 +329,8 @@ void PsTextL(struct ADrawTag *ctx,
 void PsTextC(struct ADrawTag *ctx,
               unsigned int     x,
               unsigned int     y,
-              const char      *string)
+              const char      *string,
+              const char      *url UNUSED)
 {
     PsContext *context = getPsCtx(ctx);
 
@@ -474,7 +477,7 @@ void PsSetFontSize(struct ADrawTag *ctx,
 }
 
 
-Boolean PsClose(struct ADrawTag *ctx)
+bool PsClose(struct ADrawTag *ctx)
 {
     PsContext *context = getPsCtx(ctx);
 
@@ -488,15 +491,14 @@ Boolean PsClose(struct ADrawTag *ctx)
     free(context);
     ctx->internal = NULL;
 
-    return TRUE;
+    return true;
 }
 
 
-
-Boolean PsInit(unsigned int     w,
-               unsigned int     h,
-               const char      *file,
-               struct ADrawTag *outContext)
+bool PsInit(unsigned int     w,
+            unsigned int     h,
+            const char      *file,
+            struct ADrawTag *outContext)
 {
     PsContext *context;
 
@@ -504,7 +506,7 @@ Boolean PsInit(unsigned int     w,
     context = outContext->internal = malloc_s(sizeof(PsContext));
     if(context == NULL)
     {
-        return FALSE;
+        return false;
     }
 
     /* Open the output file */
@@ -518,7 +520,7 @@ Boolean PsInit(unsigned int     w,
         if(!context->of)
         {
             fprintf(stderr, "PsInit: Failed to open output file '%s': %s\n", file, strerror(errno));
-            return FALSE;
+            return false;
         }
     }
 
@@ -591,7 +593,7 @@ Boolean PsInit(unsigned int     w,
     outContext->setFontSize     = PsSetFontSize;
     outContext->close           = PsClose;
 
-    return TRUE;
+    return true;
 }
 
 /* END OF FILE */

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: msc.c 175 2011-02-06 21:07:43Z Michael.McTernan $
+ * $Id: msc.c 203 2015-01-24 18:27:48Z Michael.McTernan $
  *
  * The message sequence parser ADT.
  * Copyright (C) 2009 Michael C McTernan, Michael.McTernan.2001@cs.bris.ac.uk
@@ -172,12 +172,13 @@ const char *MscPrettyOptType(MscOptType t)
 {
     switch(t)
     {
-        case MSC_OPT_HSCALE:      return "hscale";
-        case MSC_OPT_WIDTH:       return "width";
-        case MSC_OPT_ARCGRADIENT: return "arcgradient";
-        default:
-            return "unknown";
+        case MSC_OPT_HSCALE:       return "hscale";
+        case MSC_OPT_WIDTH:        return "width";
+        case MSC_OPT_ARCGRADIENT:  return "arcgradient";
+        case MSC_OPT_WORDWRAPARCS: return "wordwraparcs";
     }
+
+    return "<unknown>";
 }
 
 struct MscOptTag *MscFindOpt(struct MscOptTag *list,
@@ -467,10 +468,11 @@ const char *MscPrettyAttribType(MscAttribType t)
         case MSC_ATTR_ARC_TEXT_COLOUR:   return "arctextcolour";
         case MSC_ATTR_ARC_TEXT_BGCOLOUR: return "arctextbgcolour";
         case MSC_ATTR_NO_ARROWS:         return "noarrows";
-        case MSC_ATTR_BI_ARROWS  :       return "biarrows";
-        default:
-            return "<unknown>";
+        case MSC_ATTR_BI_ARROWS:         return "biarrows";
+		case MSC_ATTR_ARC_SKIP:          return "arcskip";
     }
+
+    return "<unknown>";
 }
 
 
@@ -605,21 +607,23 @@ int MscGetEntityIndex(struct MscTag *m, const char *label)
     }
 }
 
+
 void MscResetEntityIterator(struct MscTag *m)
 {
     m->nextEntity = m->entityList->head;
 }
 
-Boolean MscNextEntity(struct MscTag *m)
+
+bool MscNextEntity(struct MscTag *m)
 {
     if(m->nextEntity->next != NULL)
     {
         m->nextEntity = m->nextEntity->next;
-        return TRUE;
+        return true;
     }
     else
     {
-        return FALSE;
+        return false;
     }
 }
 
@@ -688,33 +692,38 @@ void MscResetArcIterator(struct MscTag *m)
     m->nextArc    = m->arcList->head;
 }
 
-Boolean MscNextArc(struct MscTag *m)
+
+bool MscNextArc(struct MscTag *m)
 {
     if(m->nextArc->next != NULL)
     {
         m->nextArc = m->nextArc->next;
-        return TRUE;
+        return true;
     }
     else
     {
-        return FALSE;
+        return false;
     }
 }
+
 
 const char *MscGetCurrentArcSource(struct MscTag *m)
 {
     return m->nextArc ? m->nextArc->src : NULL;
 }
 
+
 const char *MscGetCurrentArcDest(struct MscTag *m)
 {
     return m->nextArc ? m->nextArc->dst : NULL;
 }
 
+
 MscArcType MscGetCurrentArcType(struct MscTag *m)
 {
     return m->nextArc ? m->nextArc->type : MSC_INVALID_ARC_TYPE;
 }
+
 
 const char *MscGetCurrentArcAttrib(struct MscTag *m, MscAttribType a)
 {
@@ -743,7 +752,8 @@ const char *MscGetCurrentArcAttrib(struct MscTag *m, MscAttribType a)
 
 }
 
-Boolean MscGetOptAsFloat(struct MscTag *m, MscOptType type, float *const f)
+
+bool MscGetOptAsFloat(struct MscTag *m, MscOptType type, float *const f)
 {
     struct MscOptTag *opt = MscFindOpt(m->optList, type);
 
@@ -753,8 +763,9 @@ Boolean MscGetOptAsFloat(struct MscTag *m, MscOptType type, float *const f)
         return *f != 0.0f;
     }
 
-    return FALSE;
+    return false;
 }
+
 
 unsigned int MscGetCurrentArcInputLine(struct MscTag *m)
 {
@@ -768,7 +779,8 @@ unsigned int MscGetCurrentArcInputLine(struct MscTag *m)
     }
 }
 
-Boolean MscGetOptAsBoolean(struct MscTag *m, MscOptType type, Boolean *const b)
+
+bool MscGetOptAsBoolean(struct MscTag *m, MscOptType type, bool *const b)
 {
     struct MscOptTag *opt = MscFindOpt(m->optList, type);
 
@@ -779,25 +791,25 @@ Boolean MscGetOptAsBoolean(struct MscTag *m, MscOptType type, Boolean *const b)
         if(strcasecmp(v, "true") == 0 || strcasecmp(v, "yes") == 0 ||
            strcasecmp(v, "on") == 0 || strcasecmp(v, "1") == 0)
         {
-            *b = TRUE;
-            return TRUE;
+            *b = true;
+            return true;
         }
         else if(strcasecmp(v, "false") == 0 || strcasecmp(v, "no") == 0 ||
                 strcasecmp(v, "off") == 0 || strcasecmp(v, "0") == 0)
         {
-            *b = FALSE;
-            return TRUE;
+            return *b = false;
+            return true;
         }
         else
         {
             fprintf(stderr, "Warning: Unrecognised boolean option value '%s'.  Valid values are 'true',\n"
                             "         'false', 'yes', 'no', 'on', 'off', '1' and '0'.\n",
                             v);
-            return FALSE;
+            return false;
         }
     }
 
-    return FALSE;
+    return false;
 }
-/* END OF FILE */
 
+/* END OF FILE */

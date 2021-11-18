@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: svg_out.c 186 2011-03-01 21:18:19Z Michael.McTernan $
+ * $Id: svg_out.c 204 2015-01-24 18:57:51Z Michael.McTernan $
  *
  * This file is part of mscgen, a message sequence chart renderer.
  * Copyright (C) 2005 Michael C McTernan, Michael.McTernan.2001@cs.bris.ac.uk
@@ -301,7 +301,8 @@ void SvgDottedLine(struct ADrawTag *ctx,
 void SvgTextR(struct ADrawTag *ctx,
               unsigned int     x,
               unsigned int     y,
-              const char      *string)
+              const char      *string,
+              const char      *url)
 {
     SvgContext *context = getSvgCtx(ctx);
 
@@ -309,18 +310,29 @@ void SvgTextR(struct ADrawTag *ctx,
 
     y += getSpace(ctx, SvgHelvetica.descender);
 
+    if(url)
+    {
+        fprintf(getSvgFile(ctx), "<a xlink:href=\"%s\">", url);
+    }
+
     fprintf(getSvgFile(ctx),
-            "<text x=\"%u\" y=\"%u\" textLength=\"%u\" font-family=\"Helvetica\" font-size=\"%u\" fill=\"%s\">\n",
+            "<text x=\"%u\" y=\"%u\" textLength=\"%u\" font-family=\"Helvetica\" font-size=\"%u\" fill=\"%s\">",
             x - 1, y, SvgTextWidth(ctx, string), context->fontPoints, context->penColName);
     writeEscaped(ctx, string);
-    fprintf(getSvgFile(ctx), "\n</text>\n");
+    fprintf(getSvgFile(ctx), "</text>\n");
+
+    if(url)
+    {
+        fprintf(getSvgFile(ctx), "</a>", url);
+    }
 }
 
 
 void SvgTextL(struct ADrawTag *ctx,
               unsigned int     x,
               unsigned int     y,
-              const char      *string)
+              const char      *string,
+              const char      *url)
 {
     SvgContext *context = getSvgCtx(ctx);
 
@@ -328,20 +340,29 @@ void SvgTextL(struct ADrawTag *ctx,
 
     y += getSpace(ctx, SvgHelvetica.descender);
 
+    if(url)
+    {
+        fprintf(getSvgFile(ctx), "<a xlink:href=\"%s\">", url);
+    }
+
     fprintf(getSvgFile(ctx),
-            "<text x=\"%u\" y=\"%u\" textLength=\"%u\" font-family=\"Helvetica\" font-size=\"%u\" fill=\"%s\" text-anchor=\"end\">\n",
+            "<text x=\"%u\" y=\"%u\" textLength=\"%u\" font-family=\"Helvetica\" font-size=\"%u\" fill=\"%s\" text-anchor=\"end\">",
             x, y, SvgTextWidth(ctx, string), context->fontPoints, context->penColName);
     writeEscaped(ctx, string);
-    fprintf(getSvgFile(ctx), "\n</text>\n");
+    fprintf(getSvgFile(ctx), "</text>\n");
 
-
+    if(url)
+    {
+        fprintf(getSvgFile(ctx), "</a>", url);
+    }
 }
 
 
 void SvgTextC(struct ADrawTag *ctx,
               unsigned int     x,
               unsigned int     y,
-              const char      *string)
+              const char      *string,
+              const char      *url)
 {
     SvgContext  *context = getSvgCtx(ctx);
     unsigned int hw = SvgTextWidth(ctx, string) / 2;
@@ -350,11 +371,21 @@ void SvgTextC(struct ADrawTag *ctx,
 
     y += getSpace(ctx, SvgHelvetica.descender);
 
+    if(url)
+    {
+        fprintf(getSvgFile(ctx), "<a xlink:href=\"%s\">", url);
+    }
+
     fprintf(getSvgFile(ctx),
-            "<text x=\"%u\" y=\"%u\" textLength=\"%u\" font-family=\"Helvetica\" font-size=\"%u\" fill=\"%s\" text-anchor=\"middle\">\n\n",
+            "<text x=\"%u\" y=\"%u\" textLength=\"%u\" font-family=\"Helvetica\" font-size=\"%u\" fill=\"%s\" text-anchor=\"middle\">",
             x, y, SvgTextWidth(ctx, string), context->fontPoints, context->penColName);
     writeEscaped(ctx, string);
-    fprintf(getSvgFile(ctx), "\n</text>\n");
+    fprintf(getSvgFile(ctx), "</text>\n");
+
+    if(url)
+    {
+        fprintf(getSvgFile(ctx), "</a>", url);
+    }
 }
 
 
@@ -494,7 +525,7 @@ void SvgSetFontSize(struct ADrawTag *ctx,
 }
 
 
-Boolean SvgClose(struct ADrawTag *ctx)
+bool SvgClose(struct ADrawTag *ctx)
 {
     SvgContext *context = getSvgCtx(ctx);
 
@@ -511,15 +542,14 @@ Boolean SvgClose(struct ADrawTag *ctx)
     free(context);
     ctx->internal = NULL;
 
-    return TRUE;
+    return true;
 }
 
 
-
-Boolean SvgInit(unsigned int     w,
-                unsigned int     h,
-                const char      *file,
-                struct ADrawTag *outContext)
+bool SvgInit(unsigned int     w,
+             unsigned int     h,
+             const char      *file,
+             struct ADrawTag *outContext)
 {
     SvgContext *context;
 
@@ -527,7 +557,7 @@ Boolean SvgInit(unsigned int     w,
     context = outContext->internal = malloc_s(sizeof(SvgContext));
     if(context == NULL)
     {
-        return FALSE;
+        return false;
     }
 
     /* Open the output file */
@@ -541,7 +571,7 @@ Boolean SvgInit(unsigned int     w,
         if(!context->of)
         {
             fprintf(stderr, "SvgInit: Failed to open output file '%s': %s\n", file, strerror(errno));
-            return FALSE;
+            return false;
         }
     }
 
@@ -559,7 +589,8 @@ Boolean SvgInit(unsigned int     w,
                          " width=\"%upx\" height=\"%upx\"\n"
                          " viewBox=\"0 0 %u %u\"\n"
                          " xmlns=\"http://www.w3.org/2000/svg\" shape-rendering=\"crispEdges\"\n"
-                         " stroke-width=\"1\" text-rendering=\"geometricPrecision\">\n",
+                         " stroke-width=\"1\" text-rendering=\"geometricPrecision\"\n"
+                         " xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n",
                          w, h, w, h);
 
     /* Now fill in the function pointers */
@@ -580,7 +611,7 @@ Boolean SvgInit(unsigned int     w,
     outContext->setFontSize     = SvgSetFontSize;
     outContext->close           = SvgClose;
 
-    return TRUE;
+    return true;
 }
 
 /* END OF FILE */

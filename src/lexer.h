@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: lexer.h 152 2010-10-10 14:17:37Z Michael.McTernan $
+ * $Id: lexer.h 203 2015-01-24 18:27:48Z Michael.McTernan $
  *
  * Extra lexer/scanner API functions.
  * Copyright (C) 2010 Michael C McTernan, Michael.McTernan.2001@cs.bris.ac.uk
@@ -27,7 +27,7 @@
  * Header Files
  *****************************************************************************/
 
-#include "bool.h"
+#include <stdbool.h>
 
 /*****************************************************************************
  * Preprocessor Macros & Constants
@@ -48,7 +48,7 @@
 
 unsigned long  lex_getlinenum(void);
 char          *lex_getline(void);
-Boolean        lex_getutf8(void);
+bool           lex_getutf8(void);
 void           lex_destroy(void);
 
 #endif /* LEXER_H */

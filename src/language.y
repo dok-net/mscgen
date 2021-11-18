@@ -1,7 +1,7 @@
 %{
 /***************************************************************************
  *
- * $Id: language.y 175 2011-02-06 21:07:43Z Michael.McTernan $
+ * $Id: language.y 202 2015-01-24 17:56:12Z Michael.McTernan $
  *
  * Grammar and parser for the mscgen language.
  * Copyright (C) 2009 Michael C McTernan, Michael.McTernan.2001@cs.bris.ac.uk
@@ -48,7 +48,7 @@ int yylex_destroy(void);
  *  Error handling function.  The TOK_XXX names are substituted for more
  *  understandable values that make more sense to the user.
  */
-void yyerror(const char *str)
+void yyerror(void *unused, const char *str)
 {
     static const char *tokNames[] = { "TOK_OCBRACKET",          "TOK_CCBRACKET",
                                       "TOK_OSBRACKET",          "TOK_CSBRACKET",
@@ -223,6 +223,8 @@ Msc MscParse(FILE *in)
 
 
 %}
+
+%parse-param {void *YYPARSE_PARAM}
 
 %token TOK_STRING TOK_QSTRING TOK_EQUAL TOK_COMMA TOK_SEMICOLON TOK_OCBRACKET TOK_CCBRACKET
        TOK_OSBRACKET TOK_CSBRACKET TOK_MSC

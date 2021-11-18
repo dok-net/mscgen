@@ -1,3 +1,22 @@
+0.21:
+      Apply patch from damian.sparrow to fix warning in usage.c (issue #72).
+      Fix lack of initialisation for ymax producing a compiler warning (issue
+      #73).
+      Apply patch from Michel Palleau which fixes self arcs with the arcskip
+       attribute.  Previously the attribute was ignored for self-arcs, this 
+       patch and testcase fixes that.
+      Ignore '\\n' so that litteral '\n' can be output (issue #66). 
+      Improve rendering of SVGs in Dia by removing excess newlines in SVG
+       output (issue #67).
+      Fix compile issue with newer version of Bison (>=3.0?) (issue #83).
+       Thanks Niels Thykier for the patch.
+      Replace bool.h with stdbool.h and use bool/true/false inplace of hand
+       rolled Boolean/TRUE/FALSE.  Thanks sternenfeuer for the patches.
+      Hyperlinks are now added to text on SVG output.
+       Thanks to dunbar.ian for details on how to do this (issue #76).
+      Fix configure --without-freetype doing the wrong thing.
+       Thanks to mdavidsaver for spotting this (issue #79).
+
 0.20: 05/03/2011
       Fix spelling errors (issue #58)
       Add a MSC validation phase to check that all the entity names are known

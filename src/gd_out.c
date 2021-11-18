@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: gd_out.c 186 2011-03-01 21:18:19Z Michael.McTernan $
+ * $Id: gd_out.c 204 2015-01-24 18:57:51Z Michael.McTernan $
  *
  * This file is part of mscgen, a message sequence chart renderer.
  * Copyright (C) 2010 Michael C McTernan, Michael.McTernan.2001@cs.bris.ac.uk
@@ -287,7 +287,8 @@ void gdoDottedLine(struct ADrawTag *ctx,
 void gdoTextR(struct ADrawTag *ctx,
               unsigned int     x,
               unsigned int     y,
-              const char      *string)
+              const char      *string,
+              const char      *url UNUSED)
 {
     GdoContext *context = getGdoCtx(ctx);
 #ifdef USE_FREETYPE
@@ -339,23 +340,25 @@ void gdoTextR(struct ADrawTag *ctx,
 void gdoTextL(struct ADrawTag *ctx,
               unsigned int     x,
               unsigned int     y,
-              const char      *string)
+              const char      *string,
+              const char      *url)
 {
     x -= gdoTextWidth(ctx, string);
 
     /* Range check since gdImageFilledRectangle() takes signed values */
     if(x <= INT_MAX && y <= INT_MAX)
     {
-        gdoTextR(ctx, x, y, string);
+        gdoTextR(ctx, x, y, string, url);
     }
 }
 
 void gdoTextC(struct ADrawTag *ctx,
               unsigned int     x,
               unsigned int     y,
-              const char      *string)
+              const char      *string,
+              const char      *url)
 {
-    gdoTextR(ctx, x - (gdoTextWidth(ctx, string) / 2), y, string);
+    gdoTextR(ctx, x - (gdoTextWidth(ctx, string) / 2), y, string, url);
 }
 
 void gdoFilledRectangle(struct ADrawTag *ctx,
@@ -494,7 +497,7 @@ void gdoSetFontSize(struct ADrawTag *ctx,
 }
 
 
-Boolean gdoClose(struct ADrawTag *ctx)
+bool gdoClose(struct ADrawTag *ctx)
 {
     GdoContext *context = getGdoCtx(ctx);
 
@@ -512,16 +515,16 @@ Boolean gdoClose(struct ADrawTag *ctx)
     free(context);
     ctx->internal = NULL;
 
-    return TRUE;
+    return true;
 }
 
 
 
-Boolean GdoInit(unsigned int     w,
-                unsigned int     h,
-                const char      *file,
-                const char      *fontName UNUSED,
-                struct ADrawTag *outContext)
+bool GdoInit(unsigned int     w,
+             unsigned int     h,
+             const char      *file,
+             const char      *fontName UNUSED,
+             struct ADrawTag *outContext)
 {
     GdoContext *context;
 
@@ -540,7 +543,7 @@ Boolean GdoInit(unsigned int     w,
     context = outContext->internal = zalloc_s(sizeof(GdoContext));
     if(context == NULL)
     {
-        return FALSE;
+        return false;
     }
 
     /* Open the output file */
@@ -554,7 +557,7 @@ Boolean GdoInit(unsigned int     w,
         if(!context->outFile)
         {
             fprintf(stderr, "GdoInit: Failed to open output file '%s': %s\n", file, strerror(errno));
-            return FALSE;
+            return false;
         }
     }
 
@@ -600,7 +603,7 @@ Boolean GdoInit(unsigned int     w,
     outContext->setFontSize     = gdoSetFontSize;
     outContext->close           = gdoClose;
 
-    return TRUE;
+    return true;
 }
 
 #endif /* REMOVE_PNG_OUTPUT */

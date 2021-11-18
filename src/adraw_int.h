@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: adraw_int.h 115 2010-08-19 09:58:45Z Michael.McTernan $
+ * $Id: adraw_int.h 203 2015-01-24 18:27:48Z Michael.McTernan $
  *
  * This file is part of mscgen, a message sequence chart renderer.
  * Copyright (C) 2005 Michael C McTernan, Michael.McTernan.2001@cs.bris.ac.uk
@@ -42,23 +42,23 @@
  * Functions
  ***************************************************************************/
 
-Boolean NullInit(struct ADrawTag *outContext);
+bool NullInit(struct ADrawTag *outContext);
 
-Boolean GdoInit(unsigned int     w,
-                unsigned int     h,
-                const char      *file,
-                const char      *fontName,
-                struct ADrawTag *outContext);
+bool GdoInit(unsigned int     w,
+             unsigned int     h,
+             const char      *file,
+             const char      *fontName,
+             struct ADrawTag *outContext);
 
-Boolean PsInit(unsigned int     w,
-               unsigned int     h,
-               const char      *file,
-               struct ADrawTag *outContext);
+bool PsInit(unsigned int     w,
+            unsigned int     h,
+            const char      *file,
+            struct ADrawTag *outContext);
 
-Boolean SvgInit(unsigned int     w,
-                unsigned int     h,
-                const char      *file,
-                struct ADrawTag *outContext);
+bool SvgInit(unsigned int     w,
+             unsigned int     h,
+             const char      *file,
+             struct ADrawTag *outContext);
 
 #endif /* ADRAW_INT_H */
 

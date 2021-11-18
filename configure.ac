@@ -1,8 +1,8 @@
 #
-# $Id: configure.ac 178 2011-02-14 20:07:43Z Michael.McTernan@gmail.com $
+# $Id: configure.ac 205 2015-01-24 19:03:24Z Michael.McTernan $
 #
 
-AC_INIT([mscgen],[0.20],[Michael.McTernan.2001@cs.bris.ac.uk])
+AC_INIT([mscgen],[0.21],[Michael.McTernan.2001@cs.bris.ac.uk])
 AC_PREREQ(2.59)
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([src/Makefile])
@@ -102,8 +102,7 @@ if test "x$with_libgd" != "xno"; then
 
   # Check if FreeType support needs testing
   AC_ARG_WITH([freetype],
-    [AS_HELP_STRING([--with-freetype], [Enable FreeType font rendering @<:@default=no@:>@])],
-    with_freetype=yes)
+    [AS_HELP_STRING([--with-freetype], [Enable FreeType font rendering @<:@default=no@:>@])])
 
   # Check if libgd has FreeType support and is usable (i.e. has required libs)
   if test "x$with_freetype" = xyes ; then

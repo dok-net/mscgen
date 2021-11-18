@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: adraw.c 161 2010-10-26 20:17:16Z Michael.McTernan $
+ * $Id: adraw.c 203 2015-01-24 18:27:48Z Michael.McTernan $
  *
  * This file is part of mscgen, a message sequence chart renderer.
  * Copyright (C) 2005 Michael C McTernan, Michael.McTernan.2001@cs.bris.ac.uk
@@ -37,12 +37,12 @@
  * Functions
  ***************************************************************************/
 
-Boolean ADrawOpen(unsigned int    w,
-                  unsigned int    h,
-                  const char     *file,
-                  const char     *fontName,
-                  ADrawOutputType type,
-                  struct ADrawTag *outContext)
+bool ADrawOpen(unsigned int     w,
+               unsigned int     h,
+               const char      *file,
+               const char      *fontName,
+               ADrawOutputType  type,
+               struct ADrawTag *outContext)
 {
     assert(outContext);
 
@@ -56,7 +56,7 @@ Boolean ADrawOpen(unsigned int    w,
             return GdoInit(w, h, file, fontName, outContext);
 #else
             fprintf(stderr, "Built with REMOVE_PNG_OUPUT; PNG output is not supported\n");
-            return FALSE;
+            return false;
 #endif
         case ADRAW_FMT_EPS:
             return PsInit(w, h, file, outContext);
@@ -65,7 +65,7 @@ Boolean ADrawOpen(unsigned int    w,
             return SvgInit(w, h, file, outContext);
 
         default:
-            return FALSE;
+            return false;
     }
 }
 
